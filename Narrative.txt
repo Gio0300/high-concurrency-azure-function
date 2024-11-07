@@ -1,0 +1,12 @@
+Step	Description
+1	Source system publishes messages
+2	Azure Service Bus with sessions enabled automatically groups messages into sessions based on the sales order id
+3	Azure Functions runtime scales out by launching more instances to cope with the number of sessions. 
+
+Step	Description
+1	Source system publishes messages
+2	Azure Service Bus with sessions enabled automatically groups messages into sessions based on the sales order id
+3a + 3b	Azure Functions runtime scales out by launching more instances to cope with the number of sessions.
+4a + 4b	Each function acquires N number of additional sessions locks while it is waiting for the target system to respond.
+5	Each function instance still spends the majority of the time idle but now we are maximizing concurrency and thus increasing throughput and reducing over all cost.
+
