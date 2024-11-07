@@ -1,7 +1,7 @@
 Azure Functions offers a very convenient way to consume an Azure Service Bus (ASB) queue with a high degree of parallelism right out of the box. However, there are situations where a bit of tunning and customization can go a long way. This article was inspired by a real-world systems integration project.
 
 ## Context & Requirements
- A source system publishes sales order messages using the AMQP protocol to an ASB queue. The target system can only ingest data via a synchronous RESTful API. Messages belonging to the same sales order must be delivered to the target system in the order they were published to the queue. Messages from different sales orders may be processed out of order. On the surface this appears to be a straight forward integrations. 
+A source system publishes sales order messages using the AMQP protocol to an ASB queue. The target system can only ingest data via a synchronous RESTful API. Messages belonging to the same sales order must be delivered to the target system in the order they were published to the queue. Messages from different sales orders may be processed out of order. On the surface this appears to be a straightforward integrations. 
 
 A queue with [sessions](https://learn.microsoft.com/en-us/azure/service-bus-messaging/message-sessions) enabled will guarantee the messages stay in order relative to the sales order id. An Azure Function will be utilized to deliver the messages from the queue to the target system. The [ASB function trigger](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-service-bus-trigger?tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cextensionv5&pivots=programming-language-csharp) will make sure the messages will be processed shortly after they land on the queue.
 
@@ -30,13 +30,13 @@ We know the function is idle for the best part of 30 seconds. Let's put that idl
 
 ![Concurrency Optimized Architecture](images/ConcurrencyOptimizedArch.png)
 
-| Step  | Description                                                                                                                                                        |
-| :---- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1     | Source system publishes messages                                                                                                                                   |
-| 2     | Azure Service Bus with sessions enabled automatically groups messages into sessions based on the sales order id                                                    |
-| 3a+3b | Azure Functions runtime scales out by launching more instances to cope with the number of sessions.                                                                |
-| 4a+4b | Each function acquires N number of additional sessions locks while it is waiting for the target system to respond.                                                 |
-| 5     | Each function instance still spends the majority of the time idle but now we are maximizing concurrency and thus increasing throughput and reducing over all cost. |
+| Step  | Description                                                                                                                                                       |
+| :---- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | Source system publishes messages                                                                                                                                  |
+| 2     | Azure Service Bus with sessions enabled automatically groups messages into sessions based on the sales order id                                                   |
+| 3a+3b | Azure Functions runtime scales out by launching more instances to cope with the number of sessions.                                                               |
+| 4a+4b | Each function acquires N number of additional sessions locks while it is waiting for the target system to respond.                                                |
+| 5     | Each function instance still spends the majority of the time idle but now we are maximizing concurrency and thus increasing throughput and reducing overall cost. |
 
 ## Code Sample
 
